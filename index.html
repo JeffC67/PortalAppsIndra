@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Aplicaciones</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">Portal de Aplicaciones</div>
+    <div class="subtitle">Acceso rápido a herramientas de Indra, Hogar y Móvil</div>
+    <div class="search-wrap">
+      <input id="search" class="search" type="search"
+             placeholder="Buscar aplicación, función o categoría..." autocomplete="off">
+      <button id="clear" class="clear" title="Limpiar búsqueda">×</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <nav id="topNav" class="top-nav" aria-label="Categorías principales"></nav>
+  <div id="counter" class="counter"></div>
+  <section id="content"></section>
+</main>
+
+<footer class="footer">Portal interno de aplicaciones · Los enlaces provienen del archivo de referencia</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
