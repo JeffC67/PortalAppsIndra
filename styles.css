@@ -100,3 +100,21 @@ mark{background:#fff0a6;padding:0 2px;border-radius:3px}
   .apps{grid-template-columns:1fr}
   .main-btn{flex:1}
 }
+
+/* --- badge de sincronización --- */
+.badge{
+  font-size:11px;padding:3px 9px;border-radius:20px;
+  background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;
+}
+.badge.dirty{background:#fffbeb;color:#92400e;border-color:#fde68a}
+
+/* --- toast --- */
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);
+  background:#1f2937;color:#fff;padding:12px 18px;border-radius:10px;
+  font-size:13px;max-width:min(520px,92vw);z-index:100;
+  opacity:0;pointer-events:none;transition:.22s;box-shadow:0 10px 30px rgba(0,0,0,.25)
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.ok{background:#065f46}
+.toast.err{background:#991b1b}
