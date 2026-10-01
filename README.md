@@ -1,30 +1,46 @@
 # Portal de Aplicaciones
 
-Versión simple del portal original.
+Portal de acceso rápido a herramientas de Indra, Hogar y Móvil. Sin servidor, sin base de datos.
 
 ## Estructura
 
 - `index.html`: estructura HTML.
-- `styles.css`: estilos que estaban dentro de `<style>`.
-- `app.js`: JavaScript, incluyendo `SEED_DATA` con todos los datos de las aplicaciones.
+- `styles.css`: estilos.
+- `data.js`: **catálogo publicado**, es lo que ve todo el equipo. GitHub Pages lo sirve.
+- `app.js`: lógica de la app. Incluye `SEED_DATA` como respaldo si `data.js` no está disponible.
 
 ## Gestión de enlaces (CRUD)
 
-El botón **Gestionar enlaces** en el encabezado activa el modo edición. Ahí se puede:
+El botón **Gestionar enlaces** del encabezado activa el modo edición. Ahí se puede:
 
 - **Crear**: categorías (`+ Categoría`), grupos (`+ Grupo`) y enlaces (`+ Enlace`).
 - **Editar**: botones `✎` sobre categorías, grupos y enlaces, también desde los resultados de búsqueda.
 - **Eliminar**: botones `🗑`, con confirmación.
 
-Los cambios se guardan en `localStorage` del navegador, así que persisten al recargar.
-El botón **Restaurar originales** vuelve a los datos de `app.js`, y **Exportar** / **Importar**
-permiten mover el catálogo entre equipos mediante un archivo `portal-apps.json`.
+Los cambios se guardan al instante en el navegador donde los haces, así que sobreviven al recargar.
 
-## Importante
+## Cómo comparte el equipo un cambio
 
-Los datos originales permanecen dentro de `app.js` como `SEED_DATA` y sirven de respaldo.
-No se utiliza Excel, SQLite, API ni servidor.
+Sin servidor, el catálogo compartido es un archivo del repositorio:
 
-## Ejecución
+1. Entra al portal y pulsa **Gestionar enlaces**.
+2. Crea, edita o elimina lo que necesites.
+3. Pulsa **Publicar para el equipo**: descarga un `data.js` con todos los cambios.
+4. Sube ese `data.js` al repositorio. En ~1 minuto GitHub Pages lo publica y todo el
+   equipo ve la versión nueva al recargar.
 
-Puede abrirse directamente haciendo doble clic en `index.html`.
+Mientras no subas el `data.js`, tus cambios solo existen en tu navegador: un compañero
+que entre verá la versión publicada anterior.
+
+**Importar** / **Exportar** sirven para pasar el catálogo a mano entre equipos sin tocar el repo.
+
+## Notas
+
+- `localStorage` es un borrador local y tiene prioridad sobre `data.js`. Si borras los datos
+  del sitio en tu navegador, vuelves a ver el catálogo publicado.
+- `data.js` incluye `version` y `build`. El botón de publicar los incrementa automáticamente.
+- Si `data.js` falta o se rompe, la app cae automáticamente al `SEED_DATA` de `app.js`.
+- Enlaces sin URL configurada (por ejemplo `MAXIMO`) se muestran igual, pero no navegan:
+  aparecen con borde punteado y `title` explicando que falta la URL.
+- Al cambiar `app.js`, `styles.css` o `data.js`, sube el número de versión en `index.html`
+  (`?v=...`) para que los navegadores no sirvan la versión cacheada anterior.

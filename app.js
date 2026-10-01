@@ -1,6 +1,15 @@
 const SEED_DATA = {"INDRA": [{"name": "Herramientas Indra", "apps": [{"name": "GENESYS", "url": "https://login.mxc1.pure.cloud/#/signup/a25tYWxkb25hZG9AaW5kcmFjb21wYW55LmNvbTpSQVdubTBXVHV5aWlSMllsQTZseA", "description": "CONEXIÓN A LINEA Y CHAT"}, {"name": "TIPIFICADOR", "url": "https://voxnexo.flexitco.co/signalcore/login", "description": "TIPIFICACIÓN INDRA"}, {"name": "INDRA WEB", "url": "https://login.indraweb.net/logon/LogonPoint/tmindex.html", "description": "INDRA"}, {"name": "CORREO", "url": "https://login.microsoftonline.com", "description": "CORREO INDRA"}, {"name": "INDRA LIFE", "url": "https://indralifeprod-b9d6hphxbveubpap.a03.azurefd.net/Login/Index", "description": "INDRA"}, {"name": "CONVERGENCIA", "url": "https://convergencia.claro.com.co/sigma/app/index#/login", "description": "DESBLOQUEAR USUARIO CLARO"}]}], "HOGAR": [{"name": "HERRAMIENTAS CONSULTA", "apps": [{"name": "CONECTADOS", "url": "https://conectados.com.co/inicio", "description": "CONSULTA DE CAPSULAS INFORMACIÓN"}]}, {"name": "FACTURA HOGAR Y CERTIFICADO", "apps": [{"name": "PARADIGMA", "url": "https://facturasclaro.paradigma.com.co/ebpTelmex/Login.aspx?", "description": "CONSULTA DE FACTURA"}, {"name": "CERTIFICADO CUENTAL AL DÍA", "url": "https://100.123.251.118:8086/", "description": "CUENTA AL DÍA"}]}, {"name": "AJUSTE HOGAR", "apps": [{"name": "DIME", "url": "https://dime.claro.com.co/Portal/Produccion/Sesion/Inicio/Ingresar?", "description": "AJUSTE HOGAR Y MÓVIL"}]}, {"name": "AGENDAR OT Y LLS", "apps": [{"name": "MODULO DE AGENDAMIENTO", "url": "https://moduloagenda.cable.net.co/", "description": "AGENDAR VISITAS (OT Y LLS)"}]}, {"name": "SOPORTE ENVIO URL OTT HOGAR Y MOVIL", "apps": [{"name": "CLARO OTTs", "url": "http://172.24.216.149:8002/Otts/#/login", "description": "ENVIO DE URL DE OTT (NETFLIX-DISNEY-AMAZON)"}]}, {"name": "ESCALAR CASOS POR MI ASISTENCIA 360 HOGAR Y MOVIL", "apps": [{"name": "MI ASISTENCIA 360", "url": "https://miasistencia360-dwp.claro.com.co/dwp/app/#/page/vffgofyw", "description": "ESCALAR CASOS POR FALLAS HOHAR Y MOVIL"}, {"name": "FORMATOS", "url": "http://wweb02prod:91/Pages/Default.aspx", "description": "FORMATOS MÓVIL"}]}, {"name": "SOPORTE HOGAR", "apps": [{"name": "T&D", "url": "http://100.126.23.19:3000/tyd/login", "description": "GUIA DE SOPORTE"}, {"name": "DIAGNOSTICADOR RESIDENCIAL", "url": "http://100.123.246.38/diagnosticador/residencial/", "description": "ESTADO DEL SERVICIO HFC Y FTTH"}, {"name": "APROVISIONAMIENTO", "url": "https://moduloagenda.cable.net.co/", "description": "APROVISIONAMIENTO"}, {"name": "TR69", "url": "https://acstr069.claro.net.co/CSR/Default.aspx", "description": "SOPORTE FTTH"}]}, {"name": "SOPORTE HOGAR RED EXTERNA", "apps": [{"name": "XPERTRAK", "url": "https://100.123.88.84/pathtrak", "description": "ESTADO DEL NODO BOGOTA"}, {"name": "XPERTRAK BOGOTA", "url": "https://100.123.88.85/pathtrak", "description": "ESTADO DEL NODO NACIONAL"}, {"name": "MAXIMO", "url": "NINGUNO", "description": "RED EXTERNA"}, {"name": "DIAGNOSTICADOR DE NODOS", "url": "http://100.123.247.15:8080/diagNodos", "description": "NIVELES DEL NODO"}, {"name": "KOU", "url": "http://172.31.228.132/kou_residencial/graph_view.php?action=list", "description": "GRAFICAS DE KOU"}]}, {"name": "TECNOLOGIA", "apps": [{"name": "ASCARD", "url": "https://ascard.claro.com.co:10110/AdminWeb/pages/login/login.jsf", "description": "CONSULTA DE EQUIPOS FINANCIADOS"}, {"name": "ABSOLUT", "url": "https://ds.absolute.com/idp-discovery?entityID=https%3A%2F%2Fnamespace.absolute.com%2Fsaml2%2Fsp%2Fcc.absolute.com.shib&return=https%3A%2F%2Fcc.absolute.com%2FShibboleth.sso%2FLogin%3FSAMLDS%3D1%26target%3Dss%253Amc%253Ac84fe14d3ad3e587c82130563c1a34cc062158624cb5b2acc3921f251fc8ff95%20Absolute%20Absolute%20IDP%20Discovery%20Service", "description": "LIBERAR TABLET Y PC"}, {"name": "LOGITECH", "url": "https://appsnotus.logytechmobile.com/notusils/Trazabilidad/BusquedaServicios.aspx?", "description": "VALIDAR ENTREGA DE EQUIPOS A DOMICILIO"}, {"name": "PHONE  PROTEC", "url": "https://phpterminal.claro.com.co:8080/PhoneProtectWeb/login", "description": "LIBERAR CELULARES"}]}, {"name": "CASA DE COBRANZA HOGAR Y MÓVIL", "apps": [{"name": "GEVENUE", "url": "https://portalgevenue.claro.com.co/gevenue/", "description": "CASAS DE COBRO"}]}, {"name": "CREAR HHPP-DIRECCIÓN HOGAR", "apps": [{"name": "MER", "url": "https://mglapp.claro.com.co/catastro-warIns/view/MGL/template/login.xhtml", "description": "CREAR HHPP HOGAR"}]}, {"name": "ELIMINAR APP MI CLARO", "apps": [{"name": "MI CLARO USUARIOS", "url": "https://www.claroparatiprimero.co/landing-eliminacion/", "description": "ELIMINAR APP MI CLARO"}]}, {"name": "HOGAR CREAR OT", "apps": [{"name": "VISOR MOVILIDAD", "url": "https://visormobile.claro.com.co/VisorMobile-war/SessionExpirada;jsessionid=aU6DKnKxPAhSEB2jVinr-hMe9FRfuoSrgqiJPyq9gcJYAcKCbh24!2107910534", "description": "CREAR TRASLADO-MIGRACIÓN Y OT"}]}], "MÓVIL": [{"name": "HERRAMIENTAS CONSULTA", "apps": [{"name": "CONECTADOS", "url": "https://conectados.com.co/inicio", "description": "CONSULTA DE CAPSULAS INFORMACIÓN"}]}, {"name": "FACTURA MÓVIL Y CERTIFICADO", "apps": [{"name": "PARADIGMA", "url": "https://facturasclaro.paradigma.com.co/ebpTelmex/Login.aspx?", "description": "CONSULTA DE FACTURA"}, {"name": "CERTIFICADO CUENTAL AL DÍA", "url": "https://100.123.251.118:8086/", "description": "CUENTA AL DÍA"}]}, {"name": "AJUSTE MÓVIL", "apps": [{"name": "DIME", "url": "https://dime.claro.com.co/Portal/Produccion/Sesion/Inicio/Ingresar?", "description": "AJUSTE HOGAR Y MÓVIL"}]}, {"name": "SOPORTE ENVIO URL OTT HOGAR Y MOVIL", "apps": [{"name": "CLARO OTTs", "url": "http://172.24.216.149:8002/Otts/#/login", "description": "ENVIO DE URL DE OTT (NETFLIX-DISNEY-AMAZON)"}]}, {"name": "SOPORTE MÓVIL", "apps": [{"name": "PERFIL SIM", "url": "https://minisitiosclaro.claro.com.co/SimCardPerfil/", "description": "PERFIL DE LA SIM CARD"}, {"name": "SARA", "url": "https://100.123.27.221/sara/login", "description": "FALLA DE RED"}, {"name": "PCFR", "url": "http://100.123.250.103:8083/User/InformacionConsumos.aspx", "description": "CONSUMO DE DATOS"}, {"name": "SMO", "url": "http://100.123.251.118:82/consulta_usuarios.aspx", "description": "APROVISIONAR LA LINEA SMO"}, {"name": "CONFIRMAR IMEI REGISTRADO/ROBADO", "url": "https://www.imeicolombia.com.co/", "description": "IMEI BLOQUEO Y DUPLICADO"}, {"name": "CONFIGURACIÓN APN", "url": "https://www.helpforsmartphone.com/ting/es-ES/devices/?make=plum", "description": "CONFIGURAR CONEXIÓN A INTERNET"}, {"name": "CMC", "url": "http://wweb02prod:82/Claro.Cmc/Login/Login.aspx", "description": "CONCILIAR LA LINEA MÓVIL"}, {"name": "CONSULTA BROADCAST", "url": "http://100.123.251.118:8082/Componentes/Asp/ConsultaBroadCast.aspx", "description": "MENSAJES BROADCAST"}, {"name": "PORTAL SMS", "url": "http://172.24.216.148:8002/PortalSMS/#/login", "description": "SUSCRIPCIÓN Y CONTENIDOS SMS"}, {"name": "MAPA DE COBERTURA", "url": "https://www.claro.com.co/personas/servicios/servicios-moviles/cobertura/?fuente=google&medio=cpl&campaign=CLA800153993_POS_POR_PILOTO-CPA_CPL_DIS_PMA_DPY_PEF&keyword=&gad_source=1&gad_campaignid=23849361094&gbraid=0AAAAAC4zIb4_BeWOizN6zEdPcEbkY5H1e&gclid=EAIaIQobChMIkpPmwO7PlAMVBaFaBR3eUB6fEAAYASAAEgL3hfD_BwE", "description": "MAPA DE COBERTURA 2G,3G,4G,5G"}, {"name": "PORTABILIDAD", "url": "https://www.portabilidadcolombia.com.co/", "description": "CONFIRMAR PORTABILIDAD"}]}, {"name": "SOPORTE MÓVIL PREPAGO PAQUETES", "apps": [{"name": "C_MAX", "url": "http://172.24.4.168/custcare_cmax//ErrorPage.su?", "description": "RECARGAS Y PAQUETES"}]}, {"name": "AC PLUS", "apps": [{"name": "AC PLUS", "url": "https://acplus.claro.com.co/login", "description": "AC GESTIÓN"}]}, {"name": "TECNOLOGIA", "apps": [{"name": "ASCARD", "url": "https://ascard.claro.com.co:10110/AdminWeb/pages/login/login.jsf", "description": "CONSULTA DE EQUIPOS FINANCIADOS"}, {"name": "ABSOLUT", "url": "https://ds.absolute.com/idp-discovery?entityID=https%3A%2F%2Fnamespace.absolute.com%2Fsaml2%2Fsp%2Fcc.absolute.com.shib&return=https%3A%2F%2Fcc.absolute.com%2FShibboleth.sso%2FLogin%3FSAMLDS%3D1%26target%3Dss%253Amc%253Ac84fe14d3ad3e587c82130563c1a34cc062158624cb5b2acc3921f251fc8ff95%20Absolute%20Absolute%20IDP%20Discovery%20Service", "description": "LIBERAR TABLET Y PC"}, {"name": "LOGITECH", "url": "https://appsnotus.logytechmobile.com/notusils/Trazabilidad/BusquedaServicios.aspx?", "description": "VALIDAR ENTREGA DE EQUIPOS A DOMICILIO"}, {"name": "PHONE  PROTEC", "url": "https://phpterminal.claro.com.co:8080/PhoneProtectWeb/login", "description": "LIBERAR CELULARES"}]}, {"name": "CASA DE COBRANZA HOGAR Y MÓVIL", "apps": [{"name": "GEVENUE", "url": "https://portalgevenue.claro.com.co/gevenue/", "description": "CASAS DE COBRO"}]}, {"name": "ELIMINAR APP MI CLARO", "apps": [{"name": "MI CLARO USUARIOS", "url": "https://www.claroparatiprimero.co/landing-eliminacion/", "description": "ELIMINAR APP MI CLARO"}]}]};
 
 const STORAGE_KEY = 'portal-apps-indra:v1';
+const SCHEMA = 2;
+
+/* Catálogo publicado: viene de data.js y es lo que ve todo el equipo.
+   Si data.js no está (o la app se abre como file://), caemos al SEED_DATA embebido. */
+const PUBLISHED = (window.PORTAL_DATA && isValidData(window.PORTAL_DATA.data))
+  ? { version:String(window.PORTAL_DATA.version || '0'),
+      build:String(window.PORTAL_DATA.build || '0'),
+      data:window.PORTAL_DATA.data }
+  : { version:'0', build:'0', data:SEED_DATA };
 
 const topNav = document.getElementById('topNav');
 const content = document.getElementById('content');
@@ -15,18 +24,34 @@ let DATA = loadData();
 let currentMain = Object.keys(DATA)[0] || '';
 let focusGroup = null;
 
-function cloneSeed(){
-  return JSON.parse(JSON.stringify(SEED_DATA));
+function countApps(data){
+  return Object.values(data).reduce((n,groups) =>
+    n + groups.reduce((m,g) => m + g.apps.length, 0), 0);
 }
 
+/* El <a> debe estar en el DOM para que Firefox acepte el click programático. */
+function downloadText(filename, text){
+  const url = URL.createObjectURL(new Blob([text], {type:'text/plain;charset=utf-8'}));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+function cloneSeed(){
+  return JSON.parse(JSON.stringify(PUBLISHED.data));
+}
+
+/* Precedencia: borrador local (localStorage) > catálogo publicado (data.js) > SEED_DATA.
+   El borrador solo existe en este navegador; data.js es lo que ve todo el equipo. */
 function loadData(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw){
-      const seed = cloneSeed();
-      saveData(seed);
-      return seed;
-    }
+    if(!raw) return cloneSeed();
     const parsed = JSON.parse(raw);
     if(!isValidData(parsed)) return cloneSeed();
     return parsed;
@@ -318,7 +343,7 @@ function closeModal(){
 }
 
 function handleAction(act, ds){
-  const main = ds.main || currentMain;
+  let main = ds.main || currentMain;
 
   switch(act){
     /* categorías */
@@ -360,6 +385,12 @@ function handleAction(act, ds){
 
     /* grupos */
     case 'add-group':
+      // sin categorías, "Nuevo grupo" no tiene dónde caer: creamos la categoría que falta
+      if(!DATA[main]){
+        const created = uniqueName((main || 'NUEVA').toUpperCase(), Object.keys(DATA));
+        DATA[created] = [];
+        main = currentMain = created;
+      }
       openModal({
         title:`Nuevo grupo en ${main}`,
         fields:[{name:'name', label:'Nombre del grupo', required:true, placeholder:'Ej. FACTURACIÓN'}],
@@ -434,20 +465,26 @@ function handleAction(act, ds){
     }
 
     /* datos */
-    case 'reset':
-      if(!confirm('Se reemplazarán todos los cambios por los datos originales. ¿Continuar?')) return;
-      DATA = cloneSeed();
-      currentMain = Object.keys(DATA)[0] || '';
-      if(saveData()) renderAll();
+    case 'export':
+      downloadText('portal-apps.json', JSON.stringify(DATA, null, 2));
       break;
 
-    case 'export': {
-      const blob = new Blob([JSON.stringify(DATA, null, 2)], {type:'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'portal-apps.json';
-      a.click();
-      URL.revokeObjectURL(a.href);
+    /* Genera data.js para subirlo al repo: así lo ve todo el equipo. */
+    case 'publish': {
+      const next = (Number(PUBLISHED.version) || 0) + 1;
+      const build = new Date().toISOString().slice(0, 10);
+      const payload = {
+        version: next,
+        build,
+        data: DATA
+      };
+      if(!confirm(
+        `Se generará data.js versión ${next} (${build}) con los ${countApps(DATA)} enlace(s) de este navegador.\n\n` +
+        'Súbrelo al repositorio replacing data.js para que todo el equipo lo vea.'
+      )) return;
+      const js = '/* Catálogo publicado del portal. Generado por la app; súbelo al repo para compartirlo. */\n'
+        + `window.PORTAL_DATA = ${JSON.stringify(payload, null, 2)};\n`;
+      downloadText('data.js', js);
       break;
     }
 
