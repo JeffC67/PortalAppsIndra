@@ -649,6 +649,14 @@ function renderNav(){
   bindActions(topNav);
 }
 
+/* Resalta el término buscado. Escapa antes de marcar para que un texto con
+   HTML o con caracteres de expresión regular no rompa la búsqueda. */
+function highlight(str, term){
+  if(!term) return esc(str);
+  const safe = String(term).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return esc(str).replace(new RegExp(`(${safe})`, 'ig'), '<mark>$1</mark>');
+}
+
 function appCard(a, extra){
   const valid = isValidUrl(a.url);
   return `
