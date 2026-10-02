@@ -349,9 +349,9 @@ const FALLBACK = {
           "description": "CONFIRMAR PORTABILIDAD"
         },
         {
-          "name": "VISOR UNICO",
+          "name": "SOPORTE MOVIL",
           "url": "http://wweb02prod:8084/VisorUnico/Login.aspx",
-          "description": "VISOR ÚNICO"
+          "description": "ACTIVAR VOLTE Y FAMILIA Y AMIGOS"
         }
       ]
     },

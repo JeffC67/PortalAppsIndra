@@ -2,8 +2,8 @@
    Actualízalo desde la app con «Publicar al equipo» y sube el archivo al repo.
    Si este archivo falta o se rompe, la app usa el respaldo de app.js. */
 window.PORTAL_DATA = {
-  "version": 1,
-  "build": "2026-10-01",
+  "version": 2,
+  "build": "2026-10-02",
   "data": {
     "INDRA": [
       {
@@ -339,9 +339,9 @@ window.PORTAL_DATA = {
             "description": "CONFIRMAR PORTABILIDAD"
           },
           {
-            "name": "VISOR UNICO",
+            "name": "SOPORTE MOVIL",
             "url": "http://wweb02prod:8084/VisorUnico/Login.aspx",
-            "description": "VISOR ÚNICO"
+            "description": "ACTIVAR VOLTE Y FAMILIA Y AMIGOS"
           }
         ]
       },
