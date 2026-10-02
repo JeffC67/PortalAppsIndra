@@ -1,61 +1,36 @@
 # Portal de Aplicaciones
 
-CRUD de enlaces con permisos, desplegado en GitHub Pages. Sin servidor propio.
+Directorio de enlaces internos, desplegado en GitHub Pages. **Solo lectura**: el
+equipo abre el portal y usa los accesos; el catálogo se actualiza en el repo.
 
 ## Estructura
 
 - `index.html`: estructura HTML.
 - `styles.css`: estilos.
-- `data.js`: **catálogo publicado**. Es lo que ve todo el equipo. Lo genera la app.
-- `app.js`: lógica + `FALLBACK` (respaldo embebido por si `data.js` falta o se rompe).
+- `data.js`: **el catálogo**. Fuente única de verdad; se edita a mano y se sube al repo.
+- `app.js`: visor + respaldo `FALLBACK` embebido por si `data.js` falta o se rompe.
+- `tools/build-fallback.js`: regenera el `FALLBACK` de `app.js` a partir de `data.js`.
 
-## Cómo funciona la publicación
+## Cómo se actualiza el catálogo
 
 ```
-localStorage  →  borrador local de quien edita (instantáneo, solo en su navegador)
-data.js       →  catálogo publicado (lo ve todo el equipo)
-app.js FALLBACK →  respaldo si data.js no existe o está inválido
+data.js  →  catálogo (lo ve todo el equipo)
+app.js   →  respaldo embebido, se usa solo si data.js no carga
 ```
 
-Al editar, el badge de la barra muestra si tienes cambios sin publicar. Cuando quieras
-compartirlos, pulsas **Publicar al equipo** y la app hace un commit a `data.js` vía la API
-de GitHub. GitHub Pages lo sirve en ~1 minuto.
+1. Edita `data.js` (categorías → grupos → enlaces con `name`, `url`, `description`).
+2. Sube `version` en una unidad y actualiza `build` con la fecha (YYYY-MM-DD).
+3. Regenera el respaldo: `node tools/build-fallback.js`.
+4. Commit + push. GitHub Pages lo sirve en ~1 minuto.
 
-## Permisos: qué es real y qué no
-
-GitHub Pages es estático: no hay servidor que autentique a nadie. Conviene ser claro:
-
-| Capa | Qué protege | Qué NO protege |
-|---|---|---|
-| PIN de edición | Que un compañero no borre enlaces por accidente | Nada real: el código es público, cualquiera con devtools lo salta |
-| Token de GitHub | Quién puede hacer commit al repositorio | Es la única barrera real |
-
-El PIN se guarda como hash SHA-256 en `localStorage` del navegador. **No es seguridad.**
-Si necesitas control de acceso real, la única vía sin servidor propio es el token de
-GitHub; para autenticación por usuario harías falta un servicio externo (OAuth, Netlify
-Identity, un Worker).
-
-## Uso
-
-1. **Gestionar enlaces** → la primera vez te pide definir un PIN de 4+ caracteres.
-2. Crea, edita y borra categorías, grupos y enlaces. Se guarda al instante.
-3. **Configurar GitHub** → pega un token para poder publicar.
-   - Token clásico: scope `repo`.
-   - Token fino (recomendado): solo ese repositorio, permisos **Contents: Read and write**.
-4. **Publicar al equipo** → commit automático a `data.js`.
-
-El token se guarda solo en `sessionStorage`: al cerrar la pestaña desaparece.
-
-### Otras acciones
-
-- **Descargar data.js**: genera el archivo para subirlo a mano si prefieres no dar token.
-- **Exportar / Importar**: mueve el catálogo entre equipos a mano (`portal-apps.json`).
-- **Descartar locales**: vuelve al catálogo publicado y borra tu borrador.
+Si prefieres Pull Request, sube los dos archivos (`data.js` y `app.js`) juntos en la
+misma rama: si divergen, el respaldo queda desactualizado.
 
 ## Notas
 
-- Al publicar se incrementa `version` y se actualiza `build` (fecha) en `data.js`.
-- Si borras los datos del sitio en tu navegador, vuelves a ver el catálogo publicado.
+- El portal **no** edita nada: no hay PIN, ni token de GitHub, ni publicación desde el
+  navegador. Eso se retiró en la v3; quien tenga un borrador viejo guardado en el
+  navegador lo verá ignorado y se limpia solo.
 - Enlaces sin URL configurada se muestran igual pero no navegan (borde punteado).
 - Al cambiar `app.js`, `styles.css` o `data.js`, sube la versión en `index.html` (`?v=…`)
   para que los navegadores no sirvan la versión cacheada anterior.

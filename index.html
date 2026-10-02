@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portal de Aplicaciones</title>
-<link rel="stylesheet" href="styles.css?v=2.0.0">
+<link rel="stylesheet" href="styles.css?v=3.0.0">
 </head>
 <body>
 
@@ -17,36 +17,18 @@
              placeholder="Buscar aplicación, función o categoría..." autocomplete="off">
       <button id="clear" class="clear" title="Limpiar búsqueda">×</button>
     </div>
-    <div class="header-actions">
-      <button id="editToggle" class="btn ghost-light">Gestionar enlaces</button>
-    </div>
   </div>
 </header>
 
 <main class="container">
-  <div id="adminBar" class="admin-bar" hidden>
-    <strong>Modo edición</strong>
-    <span id="syncBadge" class="badge">—</span>
-    <span class="spacer"></span>
-    <button class="btn sm primary" data-act="publish">Publicar al equipo</button>
-    <button class="btn sm" data-act="config">Configurar GitHub</button>
-    <button class="btn sm" data-act="download-data">Descargar data.js</button>
-    <button class="btn sm" data-act="export">Exportar</button>
-    <button class="btn sm" data-act="import">Importar</button>
-    <button class="btn sm" data-act="discard">Descartar locales</button>
-    <button class="btn sm" data-act="logout">Salir</button>
-  </div>
   <nav id="topNav" class="top-nav" aria-label="Categorías principales"></nav>
   <div id="counter" class="counter"></div>
   <section id="content"></section>
 </main>
 
-<div id="modal" hidden></div>
-<div id="toast" class="toast"></div>
+<footer class="footer">Portal interno de aplicaciones · v3.0.0</footer>
 
-<footer class="footer">Portal interno de aplicaciones · v2.0.1</footer>
-
-<script src="data.js?v=2"></script>
-<script src="app.js?v=2.0.1"></script>
+<script src="data.js?v=3"></script>
+<script src="app.js?v=3.0.0"></script>
 </body>
 </html>

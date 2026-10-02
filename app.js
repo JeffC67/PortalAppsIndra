@@ -1,16 +1,13 @@
-/* Portal de Aplicaciones — catálogo + CRUD + publicación a GitHub Pages.
+/* Portal de Aplicaciones — visor de solo lectura del catálogo.
 
-   Capas de datos (gana la primera disponible):
-     1. data.js (window.PORTAL_DATA) -> catálogo publicado, lo ve todo el equipo
-     2. localStorage                  -> borrador local de quien edita
-     3. FALLBACK                      -> respaldo embebido si no hay data.js
+   Origen del catálogo (gana el primero disponible):
+     1. data.js (window.PORTAL_DATA) -> catálogo del repo, lo ve todo el equipo
+     2. FALLBACK                      -> respaldo embebido si data.js no carga
 
-   Permisos: GitHub Pages es estático, no hay servidor que autentique.
-   - El PIN protege la interfaz de edición (evita ediciones accidentales).
-     NO es seguridad real: el código es público y cualquiera puede saltárselo.
-   - El token de GitHub es lo que realmente controla quién publica al repo.
+   El portal no edita nada: para agregar o cambiar enlaces se edita data.js
+   y se sube al repo (commit o Pull Request). GitHub Pages lo sirve en ~1 min.
 
-   Para regenerar el respaldo embebado tras cambiar data.js:
+   Tras cambiar data.js, vuelve a generar el respaldo embebido:
      node tools/build-fallback.js
 */
 
@@ -349,7 +346,7 @@ const FALLBACK = {
           "description": "CONFIRMAR PORTABILIDAD"
         },
         {
-          "name": "SOPORTE MOVIL",
+          "name": "PORTAL PAC",
           "url": "http://wweb02prod:8084/VisorUnico/Login.aspx",
           "description": "ACTIVAR VOLTE Y FAMILIA Y AMIGOS"
         }
@@ -423,14 +420,7 @@ const FALLBACK = {
   ]
 };
 
-const STORAGE_KEY = 'portal-apps-indra:v1';
-const AUTH_KEY = 'portal-apps-indra:auth';
-const PIN_HASH_KEY = 'portal-apps-indra:pin';
-const PUBLISHED_KEY = 'portal-apps-indra:published';
-
-const GH_CONFIG = { owner:'JeffC67', repo:'PortalAppsIndra', branch:'main', file:'data.js' };
-
-/* ---------- catálogo publicado ---------- */
+/* ---------- catálogo ---------- */
 
 const PUBLISHED = (window.PORTAL_DATA && isValidData(window.PORTAL_DATA.data))
   ? { version:Number(window.PORTAL_DATA.version) || 0,
@@ -438,15 +428,12 @@ const PUBLISHED = (window.PORTAL_DATA && isValidData(window.PORTAL_DATA.data))
       data:window.PORTAL_DATA.data }
   : { version:0, build:'0', data:FALLBACK };
 
-/* ---------- estado ---------- */
+const DATA = PUBLISHED.data;
 
-let DATA = loadData();
 // Exposición mínima para pruebas automatizadas y depuración en consola.
 window.PORTAL_CATALOG = () => DATA;
+
 let currentMain = Object.keys(DATA)[0] || '';
-let editMode = false;
-let focusGroup = null;
-let auth = loadAuth();
 
 const $ = id => document.getElementById(id);
 const topNav = $('topNav');
@@ -454,9 +441,6 @@ const content = $('content');
 const search = $('search');
 const clear = $('clear');
 const counter = $('counter');
-const adminBar = $('adminBar');
-const modal = $('modal');
-const toast = $('toast');
 
 /* ---------- utilidades ---------- */
 
@@ -480,181 +464,36 @@ function esc(str){
   }[c]));
 }
 
-function clone(obj){
-  return JSON.parse(JSON.stringify(obj));
-}
-
 function countApps(data){
   return Object.values(data || {}).reduce((n,groups) =>
     n + groups.reduce((m,g) => m + (g.apps ? g.apps.length : 0), 0), 0);
 }
 
-function uniqueName(base, taken){
-  const has = n => taken.some(t => String(t).toLowerCase() === n.toLowerCase());
-  if(!has(base)) return base;
-  let i = 2;
-  while(has(`${base} (${i})`)) i++;
-  return `${base} (${i})`;
-}
-
-function downloadText(filename, text){
-  // MIME según el tipo: un .js guardado como text/plain no lo ejecuta el navegador
-  const mime = filename.endsWith('.js') ? 'text/javascript;charset=utf-8'
-    : filename.endsWith('.json') ? 'application/json;charset=utf-8'
-    : 'text/plain;charset=utf-8';
-  // el <a> debe estar en el DOM para que Firefox acepte el click programático
-  const url = URL.createObjectURL(new Blob([text], {type:mime}));
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-function showToast(msg, kind){
-  if(!toast) return;
-  toast.textContent = msg;
-  toast.className = `toast show ${kind || ''}`;
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => { toast.className = 'toast'; }, 4200);
-}
-
-/* ---------- autenticación (PIN + token) ---------- */
-
-function loadAuth(){
-  try{ return JSON.parse(sessionStorage.getItem(AUTH_KEY)) || {}; }
-  catch{ return {}; }
-}
-
-function saveAuth(){
-  try{ sessionStorage.setItem(AUTH_KEY, JSON.stringify(auth)); }catch{}
-}
-
-async function hashPin(pin){
-  if(!crypto.subtle) return `plain:${pin}`;
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pin));
-  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
-/* El PIN se configura una vez por el administrador y vive en localStorage.
-   Recordar: es una barrera de uso, no un control de acceso real. */
-async function ensurePin(){
-  let stored = null;
-  try{ stored = localStorage.getItem(PIN_HASH_KEY); }catch{}
-  if(stored) return stored;
-  const pin = prompt(
-    'Primera vez: define un PIN de 4+ caracteres para el modo edición.\n\n' +
-    'Ojo: en un sitio estático esto NO es seguridad real, solo evita ediciones accidentales.'
-  );
-  if(!pin) return null;
-  if(pin.length < 4) { showToast('El PIN necesita al menos 4 caracteres.', 'err'); return null; }
-  const hash = await hashPin(pin);
-  try{ localStorage.setItem(PIN_HASH_KEY, hash); }catch{}
-  return hash;
-}
-
-async function requestUnlock(){
-  const hash = await ensurePin();
-  if(!hash) return false;
-  const entered = prompt('PIN de edición:');
-  if(entered == null) return false;
-  const given = await hashPin(entered);
-  if(given !== hash){
-    showToast('PIN incorrecto.', 'err');
-    return false;
-  }
-  auth.unlocked = true;
-  saveAuth();
-  return true;
-}
-
-/* ---------- persistencia local ---------- */
-
-function loadData(){
+/* El modo edición se retiró del portal: sus borradores y su PIN quedan
+   guardados en los navegadores donde se usaba. Se limpian una sola vez para
+   que nadie los confunda con el catálogo actual. */
+function cleanLegacyStorage(){
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return clone(PUBLISHED.data);
-    const parsed = JSON.parse(raw);
-    return isValidData(parsed) ? parsed : clone(PUBLISHED.data);
-  }catch(err){
-    console.warn('No se pudieron leer los datos guardados:', err);
-    return clone(PUBLISHED.data);
-  }
-}
-
-function saveData(){
-  try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
-    markDirty();
-    return true;
-  }catch(err){
-    console.warn('No se pudieron guardar los datos:', err);
-    showToast('No se pudo guardar: el almacenamiento del navegador está lleno o bloqueado.', 'err');
-    return false;
-  }
-}
-
-/* Estado de sincronización respecto a lo publicado */
-function publishedFingerprint(){
-  return JSON.stringify(PUBLISHED.data);
-}
-
-function hasLocalChanges(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return false;
-    return JSON.stringify(JSON.parse(raw)) !== publishedFingerprint();
-  }catch{ return false; }
-}
-
-function markDirty(){
-  updateSyncBadge();
-}
-
-function updateSyncBadge(){
-  const badge = $('syncBadge');
-  if(!badge) return;
-  const dirty = hasLocalChanges();
-  badge.textContent = dirty
-    ? `Cambios locales sin publicar · publicado v${PUBLISHED.version} (${PUBLISHED.build})`
-    : `Al día con lo publicado · v${PUBLISHED.version} (${PUBLISHED.build})`;
-  badge.classList.toggle('dirty', dirty);
+    ['portal-apps-indra:v1','portal-apps-indra:pin','portal-apps-indra:published']
+      .forEach(key => localStorage.removeItem(key));
+    sessionStorage.removeItem('portal-apps-indra:auth');
+  }catch{}
 }
 
 /* ---------- render ---------- */
 
 function renderNav(){
-  const keys = Object.keys(DATA);
-  topNav.innerHTML = keys.map(key => `
-    <div class="nav-item">
-      <button class="main-btn ${key===currentMain?'active':''}" data-main="${esc(key)}">${esc(key)}</button>
-      ${editMode ? `
-        <button class="nav-act" data-act="edit-main" data-main="${esc(key)}" title="Editar categoría">✎</button>
-        <button class="nav-act" data-act="del-main" data-main="${esc(key)}" title="Eliminar categoría">🗑</button>
-      ` : ''}
-    </div>
-  `).join('') + (editMode ? `<button class="main-btn add" data-act="add-main">+ Categoría</button>` : '');
+  topNav.innerHTML = Object.keys(DATA).map(key => `
+    <button class="main-btn ${key===currentMain?'active':''}" data-main="${esc(key)}">${esc(key)}</button>
+  `).join('');
 
   topNav.querySelectorAll('.main-btn[data-main]').forEach(btn => {
     btn.addEventListener('click', () => {
       currentMain = btn.dataset.main;
       search.value = '';
-      renderNav();
-      renderMain();
+      renderAll();
     });
   });
-  bindActions(topNav);
-}
-
-/* Resalta el término buscado. Escapa antes de marcar para que un texto con
-   HTML o con caracteres de expresión regular no rompa la búsqueda. */
-function highlight(str, term){
-  if(!term) return esc(str);
-  const safe = String(term).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return esc(str).replace(new RegExp(`(${safe})`, 'ig'), '<mark>$1</mark>');
 }
 
 function appCard(a, extra){
@@ -670,50 +509,24 @@ function appCard(a, extra){
     </a>`;
 }
 
-function appTools(main, gi, ai){
-  if(!editMode) return '';
-  return `
-    <div class="app-tools">
-      <button class="btn sm" data-act="edit-app" data-main="${esc(main)}" data-gi="${gi}" data-ai="${ai}" title="Editar">✎</button>
-      <button class="btn sm danger" data-act="del-app" data-main="${esc(main)}" data-gi="${gi}" data-ai="${ai}" title="Eliminar">🗑</button>
-    </div>`;
-}
-
 function renderMain(){
   const groups = DATA[currentMain] || [];
   const total = groups.reduce((n,g) => n + g.apps.length, 0);
-  counter.textContent = `${currentMain} · ${total} aplicación(es)${editMode?' · modo edición':''}`;
-
-  const openIndex = Number.isInteger(focusGroup) ? focusGroup : 0;
-  focusGroup = null;
+  counter.textContent = `${currentMain} · ${total} aplicación(es) · ${countApps(DATA)} en total`;
 
   if(!groups.length){
-    content.innerHTML = editMode
-      ? `<div class="empty"><strong>Esta categoría no tiene grupos.</strong><br><br>
-         <button class="btn" data-act="add-group" data-main="${esc(currentMain)}">+ Crear grupo</button></div>`
-      : `<div class="empty"><strong>Esta categoría está vacía.</strong></div>`;
-    bindActions(content);
+    content.innerHTML = `<div class="empty"><strong>Esta categoría está vacía.</strong></div>`;
     return;
   }
 
   content.innerHTML = groups.map((g,gi) => `
-    <div class="group ${gi===openIndex?'open':''}" data-gi="${gi}">
-      <button class="group-header" aria-expanded="${gi===openIndex}">
+    <div class="group ${gi===0?'open':''}">
+      <button class="group-header" aria-expanded="${gi===0}">
         <span>${esc(g.name)} <em class="count">${g.apps.length}</em></span>
         <span class="chevron">▼</span>
       </button>
-      ${editMode ? `
-        <div class="group-tools">
-          <button class="btn sm" data-act="add-app" data-main="${esc(currentMain)}" data-gi="${gi}">+ Enlace</button>
-          <button class="btn sm" data-act="edit-group" data-main="${esc(currentMain)}" data-gi="${gi}">✎ Grupo</button>
-          <button class="btn sm danger" data-act="del-group" data-main="${esc(currentMain)}" data-gi="${gi}">🗑 Grupo</button>
-        </div>` : ''}
       <div class="apps">
-        ${g.apps.map((a,ai) => `
-          <div class="app-cell">
-            ${appCard(a)}
-            ${appTools(currentMain, gi, ai)}
-          </div>`).join('')}
+        ${g.apps.map(a => appCard(a)).join('')}
       </div>
     </div>
   `).join('');
@@ -725,27 +538,23 @@ function renderMain(){
       header.setAttribute('aria-expanded', group.classList.contains('open'));
     });
   });
-
-  bindActions(content);
 }
 
 function renderAll(){
   if(!DATA[currentMain]) currentMain = Object.keys(DATA)[0] || '';
-  search.value = '';
-  updateSyncBadge();
-  searchApps('');
-}
-
-function bindActions(root){
-  root.querySelectorAll('[data-act]').forEach(btn => {
-    btn.addEventListener('click', ev => {
-      ev.stopPropagation();
-      handleAction(btn.dataset.act, btn.dataset);
-    });
-  });
+  renderNav();
+  renderMain();
 }
 
 /* ---------- búsqueda ---------- */
+
+/* Resalta el término buscado. Escapa antes de marcar para que un texto con
+   HTML o con caracteres de expresión regular no rompa la búsqueda. */
+function highlight(str, term){
+  if(!term) return esc(str);
+  const safe = String(term).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return esc(str).replace(new RegExp(`(${safe})`, 'ig'), '<mark>$1</mark>');
+}
 
 function searchApps(term){
   const q = term.trim().toLowerCase();
@@ -760,10 +569,10 @@ function searchApps(term){
 
   const results = [];
   Object.entries(DATA).forEach(([main,groups]) => {
-    groups.forEach((group,gi) => {
-      group.apps.forEach((app,ai) => {
+    groups.forEach(group => {
+      group.apps.forEach(app => {
         const hay = [main, group.name, app.name, app.description, app.url].join(' ').toLowerCase();
-        if(hay.includes(q)) results.push({ main, group:group.name, gi, ai, app });
+        if(hay.includes(q)) results.push({ main, group:group.name, app });
       });
     });
   });
@@ -779,401 +588,19 @@ function searchApps(term){
         <span>${results.length} resultado(s)</span>
         <span>🔎</span>
       </div>
-      <div class="apps" style="display:grid">
-        ${results.map(r => `
-          <div class="app-cell">
-            ${appCard(r.app, {
-              name: highlight(r.app.name, q),
-              desc: highlight(r.app.description || 'Abrir aplicación', q),
-              foot: `${esc(r.main)} · ${esc(r.group)}`
-            })}
-            ${appTools(r.main, r.gi, r.ai)}
-          </div>`).join('')}
+      <div class="apps">
+        ${results.map(r => appCard(r.app, {
+          name: highlight(r.app.name, q),
+          desc: highlight(r.app.description || 'Abrir aplicación', q),
+          foot: `${esc(r.main)} · ${esc(r.group)}`
+        })).join('')}
       </div>
     </div>`;
-
-  bindActions(content);
-}
-
-/* ---------- modal ---------- */
-
-let modalEsc = null;
-
-function openModal({ title, fields, submitLabel='Guardar', onSubmit }){
-  modal.innerHTML = `
-    <div class="modal-backdrop" data-close>
-      <form class="modal-box" id="modalForm" novalidate>
-        <h3>${esc(title)}</h3>
-        ${fields.map(f => `
-          <label class="field">
-            <span>${esc(f.label)}</span>
-            <input name="${esc(f.name)}" value="${esc(f.value ?? '')}"
-                   placeholder="${esc(f.placeholder || '')}"
-                   ${f.required ? 'required' : ''}
-                   ${f.type === 'url' ? 'inputmode="url"' : ''}>
-          </label>`).join('')}
-        <p class="modal-error" id="modalError" hidden></p>
-        <div class="modal-actions">
-          <button type="button" class="btn" data-close>Cancelar</button>
-          <button type="submit" class="btn primary">${esc(submitLabel)}</button>
-        </div>
-      </form>
-    </div>`;
-  modal.hidden = false;
-
-  const form = modal.querySelector('#modalForm');
-  const error = modal.querySelector('#modalError');
-  const fail = msg => { error.textContent = msg; error.hidden = false; };
-
-  modal.querySelectorAll('[data-close]').forEach(el => {
-    el.addEventListener('click', e => {
-      if(el.classList.contains('modal-backdrop') && e.target !== el) return;
-      closeModal();
-    });
-  });
-
-  modalEsc = e => { if(e.key === 'Escape') closeModal(); };
-  document.addEventListener('keydown', modalEsc);
-  form.querySelector('input')?.focus();
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const values = {};
-    for(const f of fields){
-      const raw = (form.elements[f.name].value || '').trim();
-      if(f.required && !raw) return fail(`El campo "${f.label}" es obligatorio.`);
-      if(f.type === 'url' && raw && !isValidUrl(raw)) return fail('La URL debe empezar con http:// o https://');
-      values[f.name] = raw;
-    }
-    onSubmit(values);
-    closeModal();
-  });
-}
-
-function closeModal(){
-  modal.hidden = true;
-  modal.innerHTML = '';
-  if(modalEsc){
-    document.removeEventListener('keydown', modalEsc);
-    modalEsc = null;
-  }
-}
-
-/* ---------- CRUD ---------- */
-
-function groupAt(main, gi){
-  return (DATA[main] || [])[gi] || null;
-}
-
-function handleAction(act, ds){
-  let main = ds.main || currentMain;
-
-  switch(act){
-    /* categorías */
-    case 'add-main':
-      openModal({
-        title:'Nueva categoría',
-        fields:[{ name:'name', label:'Nombre', required:true, placeholder:'Ej. HOGAR' }],
-        onSubmit:v => {
-          const name = uniqueName(v.name.toUpperCase(), Object.keys(DATA));
-          DATA[name] = [];
-          currentMain = name;
-          if(saveData()) renderAll();
-        }
-      });
-      break;
-
-    case 'edit-main':
-      if(!DATA[main]) return;
-      openModal({
-        title:`Editar categoría "${main}"`,
-        fields:[{ name:'name', label:'Nombre', required:true, value:main }],
-        onSubmit:v => {
-          const name = uniqueName(v.name.toUpperCase(), Object.keys(DATA).filter(k => k !== main));
-          if(name === main) return;
-          DATA[name] = DATA[main];
-          delete DATA[main];
-          DATA = Object.fromEntries(Object.entries(DATA).sort(([a],[b]) => a.localeCompare(b,'es')));
-          currentMain = name;
-          if(saveData()) renderAll();
-        }
-      });
-      break;
-
-    case 'del-main': {
-      if(!DATA[main]) return;
-      const n = countApps({ [main]: DATA[main] });
-      if(!confirm(`¿Eliminar la categoría "${main}" y sus ${n} enlace(s)?`)) return;
-      delete DATA[main];
-      currentMain = Object.keys(DATA)[0] || '';
-      if(saveData()) renderAll();
-      break;
-    }
-
-    /* grupos */
-    case 'add-group':
-      if(!DATA[main]){
-        const created = uniqueName((main || 'NUEVA').toUpperCase(), Object.keys(DATA));
-        DATA[created] = [];
-        main = currentMain = created;
-      }
-      openModal({
-        title:`Nuevo grupo en ${main}`,
-        fields:[{ name:'name', label:'Nombre del grupo', required:true, placeholder:'Ej. FACTURACIÓN' }],
-        onSubmit:v => {
-          DATA[main].push({ name:uniqueName(v.name.toUpperCase(), DATA[main].map(g => g.name)), apps:[] });
-          focusGroup = DATA[main].length - 1;
-          if(saveData()) renderAll();
-        }
-      });
-      break;
-
-    case 'edit-group': {
-      const g = groupAt(main, +ds.gi);
-      if(!g) return;
-      openModal({
-        title:'Editar grupo',
-        fields:[{ name:'name', label:'Nombre del grupo', required:true, value:g.name }],
-        onSubmit:v => {
-          g.name = uniqueName(v.name.toUpperCase(), DATA[main].map(x => x.name).filter(n => n !== g.name));
-          if(saveData()) renderAll();
-        }
-      });
-      break;
-    }
-
-    case 'del-group': {
-      const g = groupAt(main, +ds.gi);
-      if(!g) return;
-      if(!confirm(`¿Eliminar el grupo "${g.name}" y sus ${g.apps.length} enlace(s)?`)) return;
-      DATA[main].splice(+ds.gi, 1);
-      focusGroup = DATA[main].length ? Math.min(+ds.gi, DATA[main].length - 1) : 0;
-      if(saveData()) renderAll();
-      break;
-    }
-
-    /* enlaces */
-    case 'add-app':
-    case 'edit-app': {
-      const gi = +ds.gi;
-      const g = groupAt(main, gi);
-      if(!g) return;
-      const editing = act === 'edit-app' ? g.apps[+ds.ai] : undefined;
-      if(act === 'edit-app' && !editing) return showToast('Ese enlace ya no existe.', 'err');
-
-      openModal({
-        title: editing ? 'Editar enlace' : `Nuevo enlace en ${g.name}`,
-        fields:[
-          { name:'name', label:'Nombre', required:true, value:editing?.name, placeholder:'Ej. PARADIGMA' },
-          { name:'url', label:'URL', type:'url', value:editing?.url, placeholder:'https://... (vacío = sin enlace)' },
-          { name:'description', label:'Descripción', value:editing?.description, placeholder:'Opcional' }
-        ],
-        onSubmit:v => {
-          if(editing) Object.assign(editing, v);
-          else g.apps.push(v);
-          currentMain = main;
-          focusGroup = gi;
-          if(saveData()) renderAll();
-        }
-      });
-      break;
-    }
-
-    case 'del-app': {
-      const g = groupAt(main, +ds.gi);
-      const a = g?.apps[+ds.ai];
-      if(!g || !a) return;
-      if(!confirm(`¿Eliminar el enlace "${a.name}"?`)) return;
-      g.apps.splice(+ds.ai, 1);
-      currentMain = main;
-      if(saveData()) renderAll();
-      break;
-    }
-
-    /* datos locales */
-    case 'export':
-      downloadText('portal-apps.json', JSON.stringify(DATA, null, 2));
-      showToast('Descargando portal-apps.json', 'ok');
-      break;
-
-    case 'import': {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'application/json,.json';
-      input.addEventListener('change', async () => {
-        const file = input.files?.[0];
-        if(!file) return;
-        try{
-          const parsed = JSON.parse(await file.text());
-          if(!isValidData(parsed)) throw new Error('formato');
-          if(!confirm('¿Reemplazar todos los datos actuales por los del archivo?')) return;
-          DATA = parsed;
-          currentMain = Object.keys(DATA)[0] || '';
-          if(saveData()) renderAll();
-          showToast('Catálogo importado.', 'ok');
-        }catch{
-          showToast('El archivo no tiene un formato válido.', 'err');
-        }
-      });
-      input.click();
-      break;
-    }
-
-    case 'discard':
-      if(!hasLocalChanges()) return showToast('No hay cambios locales que descartar.');
-      if(!confirm('Se descartarán tus cambios locales y se volverá al catálogo publicado. ¿Continuar?')) return;
-      try{ localStorage.removeItem(STORAGE_KEY); }catch{}
-      DATA = clone(PUBLISHED.data);
-      currentMain = Object.keys(DATA)[0] || '';
-      renderAll();
-      showToast('Vuelves al catálogo publicado.', 'ok');
-      break;
-
-    case 'download-data':
-      downloadText(GH_CONFIG.file, buildDataJs(DATA));
-      showToast(`Descargando ${GH_CONFIG.file}. Súbelo al repo para que lo vea el equipo.`, 'ok');
-      break;
-
-    case 'publish':
-      publishToGitHub();
-      break;
-
-    case 'config':
-      configureGitHub();
-      break;
-
-    case 'logout':
-      auth = {};
-      try{ sessionStorage.removeItem(AUTH_KEY); }catch{}
-      editMode = false;
-      adminBar.hidden = true;
-      renderAll();
-      showToast('Sesión de edición cerrada.');
-      break;
-  }
-}
-
-/* ---------- publicación a GitHub ---------- */
-
-function buildDataJs(data){
-  // Sin este guardia, publicar por error generaría un data.js sin catálogo
-  // y el equipo vería el portal vacío.
-  if(!isValidData(data)) throw new Error('No hay un catálogo válido para publicar.');
-
-  const payload = {
-    version: PUBLISHED.version + 1,
-    build: new Date().toISOString().slice(0,10),
-    data
-  };
-  return '/* Catálogo publicado. Lo ve todo el equipo en GitHub Pages.\n'
-    + '   Actualízalo desde la app con «Publicar al equipo» y sube el archivo al repo.\n'
-    + '   Si este archivo falta o se rompe, la app usa el respaldo de app.js. */\n'
-    + `window.PORTAL_DATA = ${JSON.stringify(payload, null, 2)};\n`;
-}
-
-function configureGitHub(){
-  const has = !!auth.token;
-  openModal({
-    title:'Publicar cambios con la API de GitHub',
-    fields:[
-      { name:'owner', label:'Dueño (owner)', required:true, value:auth.owner || GH_CONFIG.owner },
-      { name:'repo', label:'Repositorio', required:true, value:auth.repo || GH_CONFIG.repo },
-      { name:'branch', label:'Rama', required:true, value:auth.branch || GH_CONFIG.branch },
-      { name:'token', label:'Token de GitHub', value:'', placeholder: has ? '•••• (guardado en esta sesión)' : 'ghp_… o github_pat_…' }
-    ],
-    submitLabel:'Guardar configuración',
-    onSubmit:v => {
-      auth.owner = v.owner.trim();
-      auth.repo = v.repo.trim();
-      auth.branch = v.branch.trim();
-      if(v.token.trim()) auth.token = v.token.trim();
-      saveAuth();
-      showToast('Configuración guardada en esta sesión.', 'ok');
-      updateSyncBadge();
-    }
-  });
-}
-
-/* GitHub responde con {message}; una vista 401 sin leer el cuerpo solo decía "HTTP 401". */
-async function apiError(res, fallback){
-  let detail = '';
-  try{ detail = (await res.json()).message || ''; }catch{}
-  return detail ? `${fallback}: ${res.status} ${detail}` : `${fallback}: HTTP ${res.status}`;
-}
-
-async function publishToGitHub(){
-  if(!auth.token){
-    return configureGitHub();
-  }
-  if(!hasLocalChanges() && !confirm('No hay cambios locales respecto a lo publicado. ¿Subir igual?')) return;
-
-  const owner = auth.owner || GH_CONFIG.owner;
-  const repo = auth.repo || GH_CONFIG.repo;
-  const branch = auth.branch || GH_CONFIG.branch;
-  const path = GH_CONFIG.file;
-  const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-  const headers = {
-    'Authorization': `Bearer ${auth.token}`,
-    'Accept': 'application/vnd.github+json',
-    'Content-Type': 'application/json'
-  };
-
-  const btn = document.querySelector('[data-act="publish"]');
-  if(btn){ btn.disabled = true; btn.textContent = 'Publicando…'; }
-
-  try{
-    // 1. leer el sha actual del archivo (necesario para actualizar)
-    let sha = null;
-    const resFile = await fetch(`${api}?ref=${encodeURIComponent(branch)}`, { headers });
-    if(resFile.ok){
-      sha = (await resFile.json()).sha;
-    } else if(resFile.status !== 404){
-      throw new Error(await apiError(resFile, `no se pudo leer ${path}`));
-    }
-
-    // 2. enviar el contenido nuevo
-    const content = btoa(unescape(encodeURIComponent(buildDataJs(DATA))));
-    const res = await fetch(api, {
-      method:'PUT',
-      headers,
-      body: JSON.stringify({
-        message:`Actualiza catálogo del portal (${countApps(DATA)} enlaces)`,
-        content,
-        branch,
-        ...(sha ? { sha } : {})
-      })
-    });
-
-    if(!res.ok) throw new Error(await apiError(res, 'GitHub rechazó la publicación'));
-
-    const { commit } = await res.json();
-    showToast('Publicado. GitHub Pages lo sirve en ~1 minuto.', 'ok');
-    console.log('Commit:', commit && commit.html_url);
-  }catch(err){
-    console.warn(err);
-    showToast(`No se pudo publicar: ${err.message}`, 'err');
-  }finally{
-    if(btn){ btn.disabled = false; btn.textContent = 'Publicar al equipo'; }
-  }
 }
 
 /* ---------- arranque ---------- */
 
-async function toggleEditMode(){
-  if(editMode){
-    editMode = false;
-    adminBar.hidden = true;
-    renderAll();
-    return;
-  }
-  if(!auth.unlocked && !(await requestUnlock())) return;
-  editMode = true;
-  adminBar.hidden = false;
-  renderAll();
-}
-
-$('editToggle').addEventListener('click', toggleEditMode);
-bindActions(adminBar);
+cleanLegacyStorage();
 search.addEventListener('input', e => searchApps(e.target.value));
 clear.addEventListener('click', () => { search.value = ''; search.focus(); renderAll(); });
 

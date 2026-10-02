@@ -1,8 +1,7 @@
-/* Catálogo publicado. Lo ve todo el equipo en GitHub Pages.
-   Actualízalo desde la app con «Publicar al equipo» y sube el archivo al repo.
+/* Catálogo del portal. Fuente única de verdad: edita este archivo y súbelo al repo.
    Si este archivo falta o se rompe, la app usa el respaldo de app.js. */
 window.PORTAL_DATA = {
-  "version": 2,
+  "version": 3,
   "build": "2026-10-02",
   "data": {
     "INDRA": [
@@ -339,7 +338,7 @@ window.PORTAL_DATA = {
             "description": "CONFIRMAR PORTABILIDAD"
           },
           {
-            "name": "SOPORTE MOVIL",
+            "name": "PORTAL PAC",
             "url": "http://wweb02prod:8084/VisorUnico/Login.aspx",
             "description": "ACTIVAR VOLTE Y FAMILIA Y AMIGOS"
           }
